@@ -1,0 +1,6 @@
+; $Id$
+name = Twit
+description = Site single user twitter feed module
+core = 6.x
+package = "Blue Lobster Modules by Adam"
+version = 6.x - 1.0-beta2
