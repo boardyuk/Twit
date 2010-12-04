@@ -6,6 +6,9 @@
  * Twit module file.
  */
 
+// Include the URL encoder
+module_load_include('inc', 'twit', 'twit');
+
 /**
  * Grab the tweets and save them to the json file
  * @param twitter username
@@ -74,7 +77,6 @@ function twit_admin() {
 * 
 */
 function twit_menu() {
-
   $items = array();
 
   $items['admin/settings/twit'] = array(
@@ -112,7 +114,6 @@ function twit_help($path, $arg) {
 * @param array $edit only for "save" operation
 */
 function twit_block($op = 'list', $delta = 0, $edit = array()) {
-
   if ($op == "list") {
     // Generate listing of blocks from this module, for the admin/block page
     $block = array();
@@ -139,7 +140,7 @@ function twit_block($op = 'list', $delta = 0, $edit = array()) {
 
     for ($i=0; $i < $count; $i++) {
       $block_content .= '<div class="tweet">';
-      $block_content .= '<div class="text">' . t($decode[$i]['text']) . '</div>';
+      $block_content .= '<div class="text">' . MakeItLink::transform(t($decode[$i]['text'])) . '</div>';
       $block_content .= '<div class="created">' . t(date('F jS Y', strtotime($decode[$i]['created_at']))) . '</div>';
       /*if ($decode[$i][geo][coordinates][1]) {
         $block_content .= "<div class=\"geo\">Long = ".$decode[$i][geo][coordinates][1]."Lat = ".$decode[$i][geo][corrdinates][0]."</div>";
