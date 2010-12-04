@@ -6,6 +6,9 @@
  * Twit module file.
  */
 
+// Include the URL encoder
+module_load_include('inc', 'twit', 'twit');
+
 /**
  * Grab the tweets and save them to the json file
  * @param twitter username
@@ -14,7 +17,7 @@
  */
 function savetweets($username, $count) {
   // Set the file name
-  $dir = file_directory_path();
+  $dir = drupal_realpath('public://');
   $local_file = $dir . '/' . $username . '.json';
 
   // See if the file exists and when it was updated last
@@ -50,7 +53,7 @@ function twit_admin() {
   $form['twit_user'] = array(
     '#type' => 'textfield',
     '#title' => t('Username of twitter account'),
-    '#default_value' => variable_get('twit_user', NULL),
+    '#default_value' => variable_get('twit_user'),
     '#size' => 25,
     '#maxlength' => 25,
     '#description' => t("The user account of the twitter account being used for the site feed with the @."),
@@ -74,12 +77,11 @@ function twit_admin() {
 * 
 */
 function twit_menu() {
-
   $items = array();
 
   $items['admin/settings/twit'] = array(
-    'title' => t('Twit module settings'),
-    'description' => t('Set the twitter account for Twit to function'),
+    'title' => 'Twit module settings',
+    'description' => 'Set the twitter account for Twit to function',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('twit_admin'),
     'access arguments' => array('access administration pages'),
@@ -106,60 +108,69 @@ function twit_help($path, $arg) {
 } // function twit_help
 
 /**
-* Implementation of hook_block().
-* @param string $op one of "list", "view", "save" and "configure"
-* @param integer $delta code to identify the block
-* @param array $edit only for "save" operation
+* Implementation of hook_block_info().
 */
-function twit_block($op = 'list', $delta = 0, $edit = array()) {
+function twit_block_info() {
+	$blocks['twit'] = array(
+		'info' => t('Twit'),
+	);
+	
+	return $blocks;
+} // function twit_block_info
 
-  if ($op == "list") {
-    // Generate listing of blocks from this module, for the admin/block page
-    $block = array();
-    $block[0]["info"] = t('Twit');
-    return $block;
-  }
-  elseif ($op == "view") {
-    // Empty variable to store content
-    $block_content = '';
-
-    if (variable_get('twit_user', NULL) == '') {
-      // no content
-      $block['subject'] = 'Twit';
-      $block['content'] = '<div class=\"text\">' . t('Please set the twitter username in the settings page in Site Configuration') . '</div>';
-      return $block;
-    }
-
-    $json = file_get_contents(savetweets(variable_get('twit_user', NULL), variable_get('twit_tweets', '5')));
-    $decode = json_decode($json, TRUE);
-
-    // Build the block content
-    $block_content .= '<div class="tweets">';
-    $count = count($decode);
-
-    for ($i=0; $i < $count; $i++) {
-      $block_content .= '<div class="tweet">';
-      $block_content .= '<div class="text">' . t($decode[$i]['text']) . '</div>';
-      $block_content .= '<div class="created">' . t(date('F jS Y', strtotime($decode[$i]['created_at']))) . '</div>';
-      /*if ($decode[$i][geo][coordinates][1]) {
-        $block_content .= "<div class=\"geo\">Long = ".$decode[$i][geo][coordinates][1]."Lat = ".$decode[$i][geo][corrdinates][0]."</div>";
-      }*/
-      $block_content .= "</div>";
-    }
-    $block_content .= '<div class="follow"><a href="http://www.twitter.com/' . $decode[0]['user']['screen_name'] . '" target="_blank">Follow on Twitter</a></div>';
-    $block_content .= '</div>';
-    
-    // check to see if there was any content before returning
-    //  the block view
-    if ($block_content == '') {
-      // no content
-      $block['subject'] = 'Twit';
-      $block['content'] = '<div class="text">' . t('Sorry No Tweets yet') . '</div>';
-      return $block;
-    }
-    // set up the block
-    $block['subject'] = 'Twit';
-    $block['content'] = $block_content;
-    return $block;
-  }
-} // function twit_block
+/**
+* Implementation of hook_block_view().
+*/
+function twit_block_view($delta = '') {
+	$block = array();
+	
+	switch($delta) {
+		case 'twit':
+		
+			$block_content = '';
+		
+			if (variable_get('twit_user') == '') {
+				// no content
+				$block['subject'] = 'Twit';
+				$block['content'] = '<div class=\"text\">' . t('Please set the twitter username in the settings page in Site Configuration') . '</div>';
+				
+				return $block;
+			}
+		
+			$json = file_get_contents(savetweets(variable_get('twit_user'), variable_get('twit_tweets', '5')));
+			$decode = json_decode($json, TRUE);
+		
+			// Build the block content
+			$block_content .= '<div class="tweets">';
+			$count = count($decode);
+		
+			for ($i=0; $i < $count; $i++) {
+				$block_content .= '<div class="tweet">';
+				$block_content .= '<div class="text">' . MakeItLink::transform(t($decode[$i]['text'])) . '</div>';
+				$block_content .= '<div class="created">' . t(date('F jS Y', strtotime($decode[$i]['created_at']))) . '</div>';
+				/*if ($decode[$i][geo][coordinates][1]) {
+					$block_content .= "<div class=\"geo\">Long = ".$decode[$i][geo][coordinates][1]."Lat = ".$decode[$i][geo][corrdinates][0]."</div>";
+				}*/
+				$block_content .= "</div>";
+			}
+			$block_content .= '<div class="follow"><a href="http://www.twitter.com/' . $decode[0]['user']['screen_name'] . '" target="_blank">Follow on Twitter</a></div>';
+			$block_content .= '</div>';
+			
+			// check to see if there was any content before returning
+			//  the block view
+			if ($block_content == '') {
+				// no content
+				$block['subject'] = 'Twit';
+				$block['content'] = '<div class="text">' . t('Sorry No Tweets yet') . '</div>';
+				
+				return $block;
+			}
+			// set up the block
+			$block['subject'] = 'Twit';
+			$block['content'] = $block_content;
+			
+			return $block;
+			
+		break;
+	}
+} // function twit_block_view
