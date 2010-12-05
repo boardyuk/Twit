@@ -101,7 +101,7 @@ function twit_help($path, $arg) {
   $output = '';
   switch ($path) {
     case "admin/help#twit":
-      $output = '<p>'.  t("Display recent tweets for a twitter account, currently hard-coded in the module code.") .'</p>';
+      $output = '<p>' . t("Display recent tweets for a twitter account, currently hard-coded in the module code.") . '</p>';
       break;
   }
   return $output;
@@ -111,66 +111,66 @@ function twit_help($path, $arg) {
 * Implementation of hook_block_info().
 */
 function twit_block_info() {
-	$blocks['twit'] = array(
-		'info' => t('Twit'),
-	);
-	
-	return $blocks;
+  $blocks['twit'] = array(
+    'info' => t('Twit'),
+  );
+
+  return $blocks;
 } // function twit_block_info
 
 /**
 * Implementation of hook_block_view().
 */
 function twit_block_view($delta = '') {
-	$block = array();
-	
-	switch($delta) {
-		case 'twit':
-		
-			$block_content = '';
-		
-			if (variable_get('twit_user') == '') {
-				// no content
-				$block['subject'] = 'Twit';
-				$block['content'] = '<div class=\"text\">' . t('Please set the twitter username in the settings page in Site Configuration') . '</div>';
-				
-				return $block;
-			}
-		
-			$json = file_get_contents(savetweets(variable_get('twit_user'), variable_get('twit_tweets', '5')));
-			$decode = json_decode($json, TRUE);
-		
-			// Build the block content
-			$block_content .= '<div class="tweets">';
-			$count = count($decode);
-		
-			for ($i=0; $i < $count; $i++) {
-				$block_content .= '<div class="tweet">';
-				$block_content .= '<div class="text">' . MakeItLink::transform(t($decode[$i]['text'])) . '</div>';
-				$block_content .= '<div class="created">' . t(date('F jS Y', strtotime($decode[$i]['created_at']))) . '</div>';
-				/*if ($decode[$i][geo][coordinates][1]) {
-					$block_content .= "<div class=\"geo\">Long = ".$decode[$i][geo][coordinates][1]."Lat = ".$decode[$i][geo][corrdinates][0]."</div>";
-				}*/
-				$block_content .= "</div>";
-			}
-			$block_content .= '<div class="follow"><a href="http://www.twitter.com/' . $decode[0]['user']['screen_name'] . '" target="_blank">Follow on Twitter</a></div>';
-			$block_content .= '</div>';
-			
-			// check to see if there was any content before returning
-			//  the block view
-			if ($block_content == '') {
-				// no content
-				$block['subject'] = 'Twit';
-				$block['content'] = '<div class="text">' . t('Sorry No Tweets yet') . '</div>';
-				
-				return $block;
-			}
-			// set up the block
-			$block['subject'] = 'Twit';
-			$block['content'] = $block_content;
-			
-			return $block;
-			
-		break;
-	}
+  $block = array();
+
+  switch ($delta) {
+    case 'twit':
+
+      $block_content = '';
+
+      if (variable_get('twit_user') == '') {
+        // no content
+        $block['subject'] = 'Twit';
+        $block['content'] = '<div class=\"text\">' . t('Please set the twitter username in the settings page in Site Configuration') . '</div>';
+
+        return $block;
+      }
+
+      $json = file_get_contents(savetweets(variable_get('twit_user'), variable_get('twit_tweets', '5')));
+      $decode = json_decode($json, TRUE);
+
+      // Build the block content
+      $block_content .= '<div class="tweets">';
+      $count = count($decode);
+
+      for ($i=0; $i < $count; $i++) {
+        $block_content .= '<div class="tweet">';
+        $block_content .= '<div class="text">' . MakeItLink::transform(t($decode[$i]['text'])) . '</div>';
+        $block_content .= '<div class="created">' . t(date('F jS Y', strtotime($decode[$i]['created_at']))) . '</div>';
+        /*if ($decode[$i][geo][coordinates][1]) {
+          $block_content .= "<div class=\"geo\">Long = ".$decode[$i][geo][coordinates][1]."Lat = ".$decode[$i][geo][corrdinates][0]."</div>";
+        }*/
+        $block_content .= "</div>";
+      }
+      $block_content .= '<div class="follow"><a href="http://www.twitter.com/' . $decode[0]['user']['screen_name'] . '" target="_blank">Follow on Twitter</a></div>';
+      $block_content .= '</div>';
+
+      // check to see if there was any content before returning
+      //  the block view
+      if ($block_content == '') {
+        // no content
+        $block['subject'] = 'Twit';
+        $block['content'] = '<div class="text">' . t('Sorry No Tweets yet') . '</div>';
+
+        return $block;
+      }
+      // set up the block
+      $block['subject'] = 'Twit';
+      $block['content'] = $block_content;
+
+      return $block;
+
+    break;
+  }
 } // function twit_block_view

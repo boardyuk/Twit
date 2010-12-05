@@ -10,7 +10,5 @@
 * Implements hook_install().
 */
 function twit_install() {
-  drupal_set_message(st("Please set your Twitter username at !link", 
-    array( '!link' => l('Administer > Site configuration > Twit Settings ',  'admin/settings/twit' ) )
-  ));
+  drupal_set_message(st("Please set your Twitter username using the Twit Settings administration screen."));
 } // function twit_install
