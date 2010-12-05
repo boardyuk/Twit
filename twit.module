@@ -6,9 +6,6 @@
  * Twit module file.
  */
 
-// Include the URL encoder
-module_load_include('inc', 'twit', 'twit');
-
 /**
  * Grab the tweets and save them to the json file
  * @param twitter username

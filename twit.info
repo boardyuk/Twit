@@ -4,3 +4,5 @@ description = Site single user twitter feed module
 core = 7.x
 package = "Blue Lobster Modules by Adam"
 version = 7.x - 1.0
+
+files[] = twit.inc
